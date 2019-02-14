@@ -1,0 +1,52 @@
+# def remove_collinear_features(x, threshold):
+#     '''
+#     Objective:
+#         Remove collinear features in a dataframe with a correlation coefficient
+#         greater than the threshold. Removing collinear features can help a model
+#         to generalize and improves the interpretability of the model.
+        
+#     Inputs: 
+#         threshold: any features with correlations greater than this value are removed
+    
+#     Output: 
+#         dataframe that contains only the non-highly-collinear features
+#     '''
+# #     y = df['DepDelay']
+#     # Dont want to remove correlations between Energy Star Score
+#     y = df['DepDelay']
+#     x = df.drop(columns = ['DepDelay'])
+    
+#     # Calculate the correlation matrix
+#     corr_matrix = x.corr()
+#     iters = range(len(corr_matrix.columns) - 1)
+#     drop_cols = []
+
+#     # Iterate through the correlation matrix and compare correlations
+#     for i in iters:
+#         for j in range(i):
+#             item = corr_matrix.iloc[j:(j+1), (i+1):(i+2)]
+#             col = item.columns
+#             row = item.index
+#             val = abs(item.values)
+            
+#             # If correlation exceeds the threshold
+#             if val >= threshold:
+#                 # Print the correlated features and the correlation value
+#                 # print(col.values[0], "|", row.values[0], "|", round(val[0][0], 2))
+#                 drop_cols.append(col.values[0])
+
+#     # Drop one of each pair of correlated columns
+#     drops = set(drop_cols)
+#     x = df.drop(columns = drops)
+# #     x = df.drop(columns = ['hour', 'pressure', 'humidity', 'temperature', 'wind_speed',
+# #        'description', 'Origin', 'Dest', 'DepTime', 'Distance', 'ArrTime',
+# #        'AirTime'])
+#     print(drop_cols)
+#     # Add the score back in to the data
+#     x['DepDelay'] = y
+               
+#     return x
+# features_dropped_collinear = remove_collinear_features(df, 0.6)
+# features_dropped_collinear
+
+
