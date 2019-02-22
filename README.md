@@ -1,20 +1,14 @@
 
-# 1) Get Data
+# 1) Project:  Predicting # of Flight delays given certain weather and past flight data
+
+#Data sources used:
+```
+Flight Data (2015-2017) came from: https://www.transtats.bts.gov/Fields.asp?table_id=236
+Cities Analyzed:"Atlanta",'Chicago','Dallas','Charlotte','Denver'
+Weather Data: Weather.com Historical Data 
+```
 
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
@@ -263,9 +257,6 @@
 ```python
 df = df.loc[:,~df.columns.duplicated()]
 df=df[['DepDelay','hour', 'pressure', 'humidity', 'temperature', 'wind_speed', 'description', 'Origin', 'Dest', 'DepTime', 'Distance', 'ArrTime','AirTime','CarrierDelay', 'WeatherDelay', 'NASDelay', 'SecurityDelay','LateAircraftDelay', 'CancellationCode']]
-# df['DATE'] = pd.to_datetime(df[['Year','Month', 'Day']])
-# df=df[['DepDelay','hour', 'pressure', 'humidity', 'temperature', 'wind_speed', 'description', 'Origin', 'Dest', 'DepTime', 'Distance', 'ArrTime','AirTime']]
-# df=df[df["Origin"]=="ATL"]
 ```
 
 
@@ -297,17 +288,6 @@ df.info() #total 19 columns
 
 
 
-```python
-# #Create the plot in seaborn
-# # plt.figure(figsize=(8, 2))
-# g = sns.violinplot(x="Dest", y="DepDelay", data=df[:200],palette="coolwarm")
-# g.set_ylabel('Delay')
-# g.set_xlabel('')
-# label = g.set_xticklabels(g.get_xticklabels(), rotation=90)
-# fig = g.get_figure()
-# fig.savefig("delay_violin_plot.png", bbox_inches='tight')
-```
-
 # Remove Collinear Features
 
 
@@ -324,49 +304,13 @@ def remove_collinear_features(x, threshold):
     
     Output: 
         dataframe that contains only the non-highly-collinear features
-    '''
-#     y = df['DepDelay']
-    # Dont want to remove correlations between Energy Star Score
-    y = df['DepDelay']
-    x = df.drop(columns = ['DepDelay'])
-    
-    # Calculate the correlation matrix
-    corr_matrix = x.corr()
-    iters = range(len(corr_matrix.columns) - 1)
-    drop_cols = []
-
-    # Iterate through the correlation matrix and compare correlations
-    for i in iters:
-        for j in range(i):
-            item = corr_matrix.iloc[j:(j+1), (i+1):(i+2)]
-            col = item.columns
-            row = item.index
-            val = abs(item.values)
-            
-            # If correlation exceeds the threshold
-            if val >= threshold:
-                # Print the correlated features and the correlation value
-                # print(col.values[0], "|", row.values[0], "|", round(val[0][0], 2))
-                drop_cols.append(col.values[0])
-
-    # Drop one of each pair of correlated columns
-    drops = set(drop_cols)
-    x = df.drop(columns = drops)
-#     x = df.drop(columns = ['hour', 'pressure', 'humidity', 'temperature', 'wind_speed',
-#        'description', 'Origin', 'Dest', 'DepTime', 'Distance', 'ArrTime',
-#        'AirTime'])
-    
-    # Add the score back in to the data
-    x['DepDelay'] = y
-               
-    return x
+ 
 
 df = remove_collinear_features(df, 0.6);
 y = df['DepDelay']
 X = df.drop(columns = ['DepDelay'])
 
 ```
-
 
 ```python
 X.info()
@@ -406,10 +350,7 @@ print("Skewness: %f" % y.skew())
 print("Kurtosis: %f" % y.kurt())
 ```
 
-    /home/ec2-user/anaconda3/envs/tensorflow_p36/lib/python3.6/site-packages/matplotlib/axes/_axes.py:6462: UserWarning: The 'normed' kwarg is deprecated, and has been replaced by the 'density' kwarg.
-      warnings.warn("The 'normed' kwarg is deprecated, and has been "
-
-
+  
 
 ![png](output_11_1.png)
 
@@ -433,8 +374,6 @@ print("Skewness: %f" % z.skew())
 print("Kurtosis: %f" % z.kurt())
 ```
 
-    /home/ec2-user/anaconda3/envs/tensorflow_p36/lib/python3.6/site-packages/matplotlib/axes/_axes.py:6462: UserWarning: The 'normed' kwarg is deprecated, and has been replaced by the 'density' kwarg.
-      warnings.warn("The 'normed' kwarg is deprecated, and has been "
 
 
 
@@ -472,168 +411,7 @@ numeric_subset = numeric_subset[numeric_subset_columns].apply(lambda x: (x - x.m
 # Join the two dataframes using concat
 # Make sure to use axis = 1 to perform a column bind
 features1234 = pd.concat([numeric_subset, categorical_subset], axis = 1)
-
-print(features1234.info())
-print(features1234.describe())
 ```
-
-    <class 'pandas.core.frame.DataFrame'>
-    Int64Index: 278220 entries, 0 to 50722
-    Columns: 290 entries, hour to description_very heavy rain
-    dtypes: float64(11), int64(1), uint8(278)
-    memory usage: 101.4 MB
-    None
-                    hour       pressure       humidity    temperature  \
-    count  278220.000000  278220.000000  278220.000000  278220.000000   
-    mean        0.605044       0.682790       0.699510       0.509982   
-    std         0.205597       0.102464       0.230999       0.163319   
-    min         0.000000       0.000000       0.000000       0.000000   
-    25%         0.434783       0.611570       0.526882       0.405872   
-    50%         0.608696       0.677686       0.720430       0.507827   
-    75%         0.782609       0.760331       0.913978       0.618553   
-    max         1.000000       1.000000       1.000000       1.000000   
-    
-              wind_speed       Distance  CarrierDelay   WeatherDelay  \
-    count  278220.000000  278220.000000  278220.00000  278220.000000   
-    mean        0.191611       0.155046       4.61010       1.001610   
-    std         0.124864       0.108768      23.53976      13.352123   
-    min         0.000000       0.000000       0.00000       0.000000   
-    25%         0.117647       0.078692       0.00000       0.000000   
-    50%         0.176471       0.129425       0.00000       0.000000   
-    75%         0.235294       0.198196       0.00000       0.000000   
-    max         1.000000       1.000000    1217.00000    1329.000000   
-    
-                NASDelay  SecurityDelay  LateAircraftDelay  CancellationCode  \
-    count  278220.000000  278220.000000      278220.000000          278220.0   
-    mean        2.678610       0.009241           4.101190               0.0   
-    std        12.565422       0.593218          19.550369               0.0   
-    min         0.000000       0.000000           0.000000               0.0   
-    25%         0.000000       0.000000           0.000000               0.0   
-    50%         0.000000       0.000000           0.000000               0.0   
-    75%         0.000000       0.000000           0.000000               0.0   
-    max       834.000000     123.000000        1175.000000               0.0   
-    
-              Origin_ATL     Origin_CLT     Origin_DEN     Origin_DFW  \
-    count  278220.000000  278220.000000  278220.000000  278220.000000   
-    mean        0.316372       0.095856       0.182313       0.193746   
-    std         0.465061       0.294394       0.386103       0.395233   
-    min         0.000000       0.000000       0.000000       0.000000   
-    25%         0.000000       0.000000       0.000000       0.000000   
-    50%         0.000000       0.000000       0.000000       0.000000   
-    75%         1.000000       0.000000       0.000000       0.000000   
-    max         1.000000       1.000000       1.000000       1.000000   
-    
-              Origin_ORD       Dest_ABE       Dest_ABI       Dest_ABQ  \
-    count  278220.000000  278220.000000  278220.000000  278220.000000   
-    mean        0.211714       0.001125       0.000913       0.003454   
-    std         0.408524       0.033522       0.030201       0.058670   
-    min         0.000000       0.000000       0.000000       0.000000   
-    25%         0.000000       0.000000       0.000000       0.000000   
-    50%         0.000000       0.000000       0.000000       0.000000   
-    75%         0.000000       0.000000       0.000000       0.000000   
-    max         1.000000       1.000000       1.000000       1.000000   
-    
-                      ...               description_freezing rain  \
-    count             ...                           278220.000000   
-    mean              ...                                0.000119   
-    std               ...                                0.010890   
-    min               ...                                0.000000   
-    25%               ...                                0.000000   
-    50%               ...                                0.000000   
-    75%               ...                                0.000000   
-    max               ...                                1.000000   
-    
-           description_haze  description_heavy intensity drizzle  \
-    count     278220.000000                        278220.000000   
-    mean           0.021914                             0.000837   
-    std            0.146404                             0.028927   
-    min            0.000000                             0.000000   
-    25%            0.000000                             0.000000   
-    50%            0.000000                             0.000000   
-    75%            0.000000                             0.000000   
-    max            1.000000                             1.000000   
-    
-           description_heavy intensity rain  description_heavy snow  \
-    count                     278220.000000           278220.000000   
-    mean                           0.016235                0.000557   
-    std                            0.126380                0.023597   
-    min                            0.000000                0.000000   
-    25%                            0.000000                0.000000   
-    50%                            0.000000                0.000000   
-    75%                            0.000000                0.000000   
-    max                            1.000000                1.000000   
-    
-           description_light intensity drizzle  description_light rain  \
-    count                        278220.000000           278220.000000   
-    mean                              0.008874                0.057415   
-    std                               0.093785                0.232634   
-    min                               0.000000                0.000000   
-    25%                               0.000000                0.000000   
-    50%                               0.000000                0.000000   
-    75%                               0.000000                0.000000   
-    max                               1.000000                1.000000   
-    
-           description_light snow  description_mist  description_moderate rain  \
-    count           278220.000000     278220.000000              278220.000000   
-    mean                 0.043300          0.083973                   0.014805   
-    std                  0.203533          0.277348                   0.120771   
-    min                  0.000000          0.000000                   0.000000   
-    25%                  0.000000          0.000000                   0.000000   
-    50%                  0.000000          0.000000                   0.000000   
-    75%                  0.000000          0.000000                   0.000000   
-    max                  1.000000          1.000000                   1.000000   
-    
-           description_overcast clouds  description_proximity shower rain  \
-    count                278220.000000                      278220.000000   
-    mean                      0.084138                           0.000266   
-    std                       0.277596                           0.016307   
-    min                       0.000000                           0.000000   
-    25%                       0.000000                           0.000000   
-    50%                       0.000000                           0.000000   
-    75%                       0.000000                           0.000000   
-    max                       1.000000                           1.000000   
-    
-           description_proximity thunderstorm  description_scattered clouds  \
-    count                       278220.000000                 278220.000000   
-    mean                             0.000536                      0.072914   
-    std                              0.023136                      0.259995   
-    min                              0.000000                      0.000000   
-    25%                              0.000000                      0.000000   
-    50%                              0.000000                      0.000000   
-    75%                              0.000000                      0.000000   
-    max                              1.000000                      1.000000   
-    
-           description_sky is clear  description_smoke  description_snow  \
-    count             278220.000000      278220.000000     278220.000000   
-    mean                   0.402631           0.000169          0.014726   
-    std                    0.490429           0.012996          0.120453   
-    min                    0.000000           0.000000          0.000000   
-    25%                    0.000000           0.000000          0.000000   
-    50%                    0.000000           0.000000          0.000000   
-    75%                    1.000000           0.000000          0.000000   
-    max                    1.000000           1.000000          1.000000   
-    
-           description_thunderstorm  description_thunderstorm with rain  \
-    count             278220.000000                       278220.000000   
-    mean                   0.000104                            0.000482   
-    std                    0.010209                            0.021941   
-    min                    0.000000                            0.000000   
-    25%                    0.000000                            0.000000   
-    50%                    0.000000                            0.000000   
-    75%                    0.000000                            0.000000   
-    max                    1.000000                            1.000000   
-    
-           description_very heavy rain  
-    count                278220.000000  
-    mean                      0.000018  
-    std                       0.004239  
-    min                       0.000000  
-    25%                       0.000000  
-    50%                       0.000000  
-    75%                       0.000000  
-    max                       1.000000  
-    
-    [8 rows x 290 columns]
 
 
 
@@ -690,8 +468,7 @@ print(confusion_matrix(y_pred4,y_val4))
 print('accuracy is',accuracy_score(y_pred4,y_val4))
 ```
 
-    /home/ec2-user/anaconda3/envs/tensorflow_p36/lib/python3.6/site-packages/sklearn/linear_model/logistic.py:433: FutureWarning: Default solver will be changed to 'lbfgs' in 0.22. Specify a solver to silence this warning.
-      FutureWarning)
+    
 
 
     Accuracy of logistic regression classifier on test set: 0.95
@@ -898,17 +675,6 @@ plt.show()
 # Models: SMOTE Random Forest and GradientBoosting
 # 1)Gradient and Smote Accuracy is 0.9518007332
 # 2)Random Forest and Smote Accuracy is 0.951585076
-
-
-```python
-ones=y_train[y_train==1].count()
-print(ones)
-zeross=y_train[y_train==0].count()
-print(zeross)
-```
-
-    49940
-    200458
 
 
 
@@ -1236,8 +1002,6 @@ prediction = pipeline.predict(X_testa1) #test model wit
 
 ```
 
-    /home/ec2-user/anaconda3/envs/tensorflow_p36/lib/python3.6/site-packages/sklearn/linear_model/logistic.py:433: FutureWarning: Default solver will be changed to 'lbfgs' in 0.22. Specify a solver to silence this warning.
-      FutureWarning)
 
 
 
